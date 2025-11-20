@@ -17,6 +17,34 @@ typedef struct lista{
 }Stlista;
 
 
+/// -- Função auxiliar : -- ///
+
+///Remove um nó específico da lista e retorna seu elemento
+
+static Forma removerNo(Lista lista, node *no){
+    Stlista *l = malloc(sizeof(Stlista));
+    if(l == NULL || no == NULL){
+        return NULL;
+    }
+    
+    Forma forma = no->forma;
+    if(no->ant != NULL){
+        no->ant->prox = no->prox;
+    }else{
+        l->inicio = no->prox;
+    }
+
+    if(no->prox != NULL){
+        no->prox->ant = no->ant;
+    }else{
+        l->fim = no->ant;
+    }    
+    
+    free(no);
+    l->tamanho--;
+    return forma;
+}
+
 Lista Criar_Lista(){
     Stlista *l = malloc(sizeof(Stlista));
     if(l == NULL){
@@ -122,19 +150,7 @@ Forma Remover_inicio(Lista lista){
         return NULL;
     }
 
-    node *elemento = l->inicio;
-    Forma forma = elemento->forma;
-    if(l->inicio->prox == NULL){
-        l->inicio = NULL;
-        l->fim = NULL;
-    }else{
-        l->inicio->prox->ant = NULL;
-        l->inicio = l->inicio->prox;
-    }
-
-    free(elemento);
-    l->tamanho--;
-    return forma;
+    return removerNo(l, l->inicio);
 }
 
 
@@ -148,20 +164,69 @@ Forma Remover_fim(Lista lista){
         return NULL;
     }
 
-    node* elemento = l->fim;
-    Forma forma = elemento->forma;
+    return removerNo(l, l->fim);
+}
 
-    if(l->fim->ant == NULL){
-        l->fim = NULL;
-        l->inicio = NULL;
-    }else{
-        l->fim->ant->prox = NULL;
-        l->fim = l->fim->ant;
+
+void RemoverElemento(Lista lista, Forma f){
+    Stlista *l = ((Stlista*)lista);
+    if(l == NULL || f == NULL){
+        return NULL;
+    }    
+
+    node *atual = l->inicio;
+    while(atual != NULL){
+        if(atual->forma == f){
+            removerNo(l, atual);
+            return;
+        }
+        atual = atual->prox;
     }
 
-    free(elemento);
-    l->tamanho--;
-    return forma;
+    return;
 }
+
+
+Forma Remover_condicional(Lista lista, bool (*condicao)(void*, void*), void* contexto){
+    Stlista *l = ((Stlista*)lista);
+    if(l == NULL || condicao == NULL){
+        return NULL;
+    }
+    
+    node *atual = l->inicio;
+    while(atual != NULL){
+        if(condicao(atual->forma, contexto)){
+            Forma forma = atual->forma;
+            removerNo(l, atual);
+            free(atual);
+            l->tamanho--;
+            return forma;
+        }
+        atual = atual->prox;
+    }
+
+    return NULL;
+}
+
+
+Forma Buscar_elemento(Lista lista, bool (*condicao)(void*, void*), void* contexto){
+    Stlista *l = ((Stlista*)lista);
+    if(l == NULL || condicao == NULL){
+        return NULL;
+    }
+    
+    node *atual = l->inicio;
+    while(atual != NULL){
+        if(condicao(atual->forma, contexto)){
+            return atual->forma;
+        }
+        atual = atual->prox;
+    }
+
+    return NULL;
+}
+
+
+
 
 
