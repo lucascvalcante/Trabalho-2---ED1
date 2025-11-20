@@ -22,13 +22,15 @@ void Destruir_lista(Lista l, void (*DestruirForma)(void*));
 /// @brief Insere um elemento no ínicio da lista
 /// @param l Ponteiro apontando para a lista
 /// @param f Ponteiro para a forma que será inserida na lista
-void Inserir_inicio(Lista l, Forma f);
+/// @return 'true' se a inseção for bem sucedida e 'false' se não for
+bool Inserir_inicio(Lista l, Forma f);
 
 
 /// @brief Insere um elemento no final da lista
 /// @param l Ponteiro apontando para a lista
 /// @param f Ponteiro apontando para a forma que será inserida na lista
-void Inserir_fim(Lista l, Forma f);
+/// @return 'true' se a inseção for bem sucedida e 'false' se não for
+bool Inserir_fim(Lista l, Forma f);
 
 
 /// @brief Remove o retorna o primeiro elemento da lista
@@ -46,7 +48,8 @@ Forma Remover_fim(Lista l);
 /// @brief Remove um elemento específico da lista
 /// @param l Ponteiro apontando para a lista
 /// @param Ponteiro apontando para a forma que deverá ser removida
-void RemoverElemento(Lista l, Forma f);
+/// @return 'true' se a remoção for bem sucedida e 'false' se não for
+bool RemoverElemento(Lista l, Forma f);
 
 
 /// @brief Remove e retorna um elemento da lista caso ele satisfaça uma condição
@@ -69,7 +72,7 @@ Forma Buscar_elemento(Lista l, bool (*condicao)(void*, void*), void* contexto);
 /// @param l Ponteiro apontando para a lista
 /// @param condicao Função que será aplicada em cada elemento
 /// @param contexto Dados auxiliares para a função condição
-void Percorrer_lista(Lista l, bool (*condicao)(void*, void*), void* contexto);
+void Percorrer_lista(Lista l, void (*acao)(void*, void*), void* contexto);
 
 
 /// @brief Conta quantos elementos da lista satisfazem determinada condição
