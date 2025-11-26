@@ -107,3 +107,29 @@ void KillLinha(Linha l){
     free(li->cor);
     free(li);
 }
+
+
+Linha** TranformarLinhaAnteparo(Linha linha){
+    StLinha *l = ((StLinha*)linha);
+    if(l == NULL){
+        return NULL;
+    }
+
+    Linha** segmentos = malloc(sizeof(Linha*) * 2);
+    if(segmentos == NULL){
+        return NULL;
+    }
+
+    static int id = 2000;
+    int novo_id = ++id;
+    double x1 = GetX1Linha(l);
+    double y1 = GetY1Linha(l);
+    double x2 = GetX2Linha(l);
+    double y2 = GetY2Linha(l);
+    char* cor = GetCorLinha(l);    
+
+    segmentos[0] = Criar_Linha(novo_id, x1, y1, x2, y2, cor);
+    segmentos[1] = NULL;
+
+    return segmentos;
+}

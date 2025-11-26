@@ -1,5 +1,6 @@
 #ifndef CIRCULO_H
 #define CIRCULO_H
+#include "linha.h"
 
 typedef void *Circulo;
 /*
@@ -100,5 +101,11 @@ double AreaCirculo(Circulo c);
 /// @param c Ponteiro apontando para o círculo
 void KillCirculo(Circulo c);
 
+
+/// @brief Tranforma um círculo em um segmento
+/// @param c Ponteiro apontando para o círculo
+/// @param orientacao A orientação que será o segmento do círculo
+/// @return O segmento
+Linha** TransformaCirculoSegmento(Circulo c, char orientacao);
 
 #endif

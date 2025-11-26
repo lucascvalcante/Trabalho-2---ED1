@@ -275,3 +275,54 @@ Estilo CriarCopiaEstilo(Estilo st){
     return Criar_Estilo(e->fFamily, e->fWeight, e->fSize);
 }
 
+
+Linha** TransformaTextoSegmento(Texto texto){
+    StTexto *t = ((StTexto*)texto);
+    if(t == NULL){
+        return NULL;
+    }
+
+    Linha** segmentos = malloc(sizeof(Linha*) * 2);
+    if(segmentos == NULL){
+        return NULL;
+    }
+
+    double x = GetXTexto(t);
+    double y = GetYTexto(t);
+    char *txto = GetTxtoTexto(t);
+    char ancora = GetATexto(t);
+    char *cor = GetCorbTexto(t);
+
+    int tamanho = (txto != NULL) ? strlen(txto) : 0;
+    double comprimento = 10.0 * tamanho;
+
+    double x1, x2;
+
+    switch (ancora)
+    {
+    case 'i':
+        x1 = x;
+        x2 = x + comprimento;
+        break;
+    case 'm':
+        x1 = x - comprimento / 2.0;
+        x2 = x + comprimento / 2.0;
+        break;
+    case 'f':
+        x1 = x - comprimento;
+        x2 = x;
+        break;
+        
+    default:
+        x1 = x;
+        x2 = x + comprimento;
+        break;
+    }
+
+    static int id = 3000;
+    int novo_id = ++id;
+    segmentos[0] = Criar_Linha(novo_id, x1, y, x2, y, cor);
+    segmentos[1] = NULL;
+
+    return segmentos;
+}

@@ -98,4 +98,12 @@ double AreaLinha(Linha l);
 /// @param l Ponteiro apontando para a linha
 void KillLinha(Linha l);
 
+
+/// @brief Uma linha ja é um segmento, então, transforma ela em um anteparo
+/// @param linha Ponteiro apontando para a linha
+/// @return a linha
+Linha** TranformarLinhaAnteparo(Linha linha);
+
+
+
 #endif

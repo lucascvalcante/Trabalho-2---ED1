@@ -10,6 +10,7 @@
 typedef struct formas{
     Tipo_Forma tipo;
     void *dados;
+    bool eh_anteparo;
 }Stforma;
 
 
@@ -20,6 +21,7 @@ Forma Criar_Forma(Tipo_Forma tipo, void *dados){
         exit(1);
     } 
 
+    f->eh_anteparo = false;
     f->tipo = tipo;
     f->dados = dados;
 
@@ -491,6 +493,43 @@ void InserirDadosTxt(Forma forma, FILE *txt, char *reportQry){
         break;   
     default:
         fprintf(txt, "Forma inválida!\n");
+        break;
+    }
+}
+
+void SetAnteparo(Forma forma, bool eh_anteparo){
+    Stforma *f = ((Stforma*)forma);
+    if(f == NULL){
+        return;
+    }
+    f->eh_anteparo = eh_anteparo;
+}
+
+
+bool Eh_anteparo(Forma forma){
+    Stforma *f = ((Stforma*)forma);
+    if(f == NULL){
+        return false;
+    }
+
+    return f->eh_anteparo;
+}
+
+Linha** Transforma_anteparo(Forma forma, char orientacao){
+    Stforma *f = ((Stforma*)forma);
+    if(f == NULL){
+        return NULL;
+    }
+
+    Tipo_Forma tipo = f->tipo;
+
+    switch (tipo)
+    {
+    case CIRCULO:
+        
+        break;
+    
+    default:
         break;
     }
 }

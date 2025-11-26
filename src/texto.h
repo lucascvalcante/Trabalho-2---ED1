@@ -1,5 +1,6 @@
 #ifndef TEXTO_H
 #define TEXTO_H
+#include "linha.h"
 
 typedef void *Texto;
 typedef void *Estilo;
@@ -175,6 +176,12 @@ void KillEstilo(Estilo st);
 /// @param st Estilo original
 /// @return Ponteiro para o novo estilo clonado
 Estilo CriarCopiaEstilo(Estilo st);
+
+
+/// @brief Transforma um texto em segmentos
+/// @param t Ponteiro apontando para o texto
+/// @return O segmento
+Linha** TransformaTextoSegmento(Texto t);
 
 
 #endif

@@ -1,6 +1,8 @@
 #ifndef FORMAS_H
 #define FORMAS_H
 #include <stdio.h>
+#include <stdbool.h>
+#include "linha.h"
 
 /* 
     Arquivo .h Relacionado a formas, permitindo que diferentes formas sejam tratadas de maneira uniforme.
@@ -15,9 +17,14 @@ typedef enum Tipo_Forma{
     TEXTO,
 }Tipo_Forma;
 
+/// @brief "Enum" que define se determinadas formas são anteparos ou não
+typedef enum anteparo{
+    ANTEPARO,
+    NAO_ANTEPARO,
+}StatusAnteparo;
+
 
 typedef void *Forma;
-
 
 /// @brief Cria e retorna um ponteiro para uma forma genérica
 /// @param tipo O tipo da forma(Circulo, retângulo, etc)
@@ -121,5 +128,22 @@ void SetCorpForma(Forma f, char *corp);
 /// @param f Ponteiro apontando para a forma
 void TrocaCoresForma(Forma f);
 
+
+/// @brief Marca a forma como anteparo
+/// @param f A forma a ser marcada
+void SetAnteparo(Forma f, bool eh_anteparo);
+
+
+/// @brief Define se uma forma é anteparo ou não
+/// @param f Forma a ser analisada
+/// @return 'tru' se for anteparo
+bool Eh_anteparo(Forma f);
+
+
+/// @brief Transforma formas em anteparos
+/// @param f A forma que será transformada em anteparo
+/// @param orientacao 'h' (horizontal) ou 'v' (vertical) para a conversão de círculos
+/// @return O anteparo transformado(uma linha)
+Linha** Transforma_anteparo(Forma f, char orientacao);
 
 #endif

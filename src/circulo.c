@@ -131,3 +131,30 @@ void KillCirculo(Circulo c){
     free(circ->corp);
     free(circ);
 }
+
+Linha** TransformaCirculoSegmento(Circulo c, char orientacao){
+    if(c == NULL){
+        return NULL;
+    }    
+
+    Linha ** segmentos = malloc(sizeof(Linha*)* 2);
+    if(segmentos == NULL){
+        return NULL;
+    }
+
+    static int id = 1000;
+    int novo_id = ++id;
+    double cx = GetXCirculo(c);
+    double cy = GetYCirculo(c);
+    double cr = GetRCirculo(c);
+    char *cor = GetCorbCirculo(c);
+
+    if(orientacao == 'h' || orientacao == 'H'){
+        segmentos[0] = Criar_Linha(novo_id, cx - cr, cy, cx + cr, cy, cor);
+    }else{
+        segmentos[0] = Criar_Linha(novo_id, cx, cy - cr, cx, cy + cr, cor);
+    }
+
+    segmentos[1] = NULL;
+    return segmentos;
+}
