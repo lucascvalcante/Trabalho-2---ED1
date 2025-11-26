@@ -146,4 +146,5 @@ bool Eh_anteparo(Forma f);
 /// @return O anteparo transformado(uma linha)
 Linha** Transforma_anteparo(Forma f, char orientacao);
 
+
 #endif

@@ -109,7 +109,7 @@ void KillLinha(Linha l){
 }
 
 
-Linha** TranformarLinhaAnteparo(Linha linha){
+Linha** TransformarLinhaAnteparo(Linha linha){
     StLinha *l = ((StLinha*)linha);
     if(l == NULL){
         return NULL;

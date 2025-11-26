@@ -1,5 +1,6 @@
 #ifndef RETANGULO_H
 #define RETANGULO_H
+#include "linha.h"
 
 typedef void *Retangulo;
 /*
@@ -112,6 +113,12 @@ double AreaRetangulo(Retangulo r);
 /// @brief Libera toda a memória alocada pelo retângulo 
 /// @param r Ponteiro apontando para o retângulo
 void KillRetangulo(Retangulo r);
+
+
+/// @brief Transforma um retângulo em segmentos
+/// @param r Ponteiro apontando para o retângulo
+/// @return O segmento
+Linha** TransformaRetanguloSegmento(Retangulo r);
 
 
 #endif

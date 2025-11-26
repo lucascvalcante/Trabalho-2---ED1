@@ -521,17 +521,30 @@ Linha** Transforma_anteparo(Forma forma, char orientacao){
         return NULL;
     }
 
+    Linha** segmentos = NULL;
     Tipo_Forma tipo = f->tipo;
 
     switch (tipo)
     {
     case CIRCULO:
-        
+        segmentos = TransformaCirculoSegmento(f->dados, orientacao);
         break;
-    
+    case RETANGULO:
+        segmentos = TransformaRetanguloSegmento(f->dados);
+        break;
+    case TEXTO:
+       segmentos = TransformaTextoSegmento(f->dados);
+        break;
+    case LINHA: 
+        segmentos = TransformarLinhaAnteparo(f->dados);
+        break;
     default:
+        printf("Forma inválida!\n");
+        return NULL;
         break;
     }
+
+    return segmentos;
 }
 
 

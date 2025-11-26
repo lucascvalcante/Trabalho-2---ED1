@@ -133,3 +133,31 @@ void KillRetangulo(Retangulo r){
     free(re->corp);
     free(re);
 }
+
+Linha** TranformarRetanguloSegmento(Retangulo r){
+    StRetangulo *re = ((StRetangulo*)r);
+    if(re == NULL){
+        return NULL;
+    }
+
+    Linha** segmentos = malloc(sizeof(Linha*) * 5);
+    if(segmentos == NULL){
+        return NULL;
+    }
+
+    double x = GetXRetangulo(re);
+    double y = GetYRetangulo(re);
+    double w = GetWRetangulo(re);
+    double h = GetHRetangulo(re);
+    char *cor = GetCorbRetangulo(re);
+
+    static int id = 4000;
+
+    segmentos[0] = Criar_Linha(++id, x, y, x + w, y, cor);
+    segmentos[1] = Criar_Linha(++id, x + w, y, x + w, y + h, cor);
+    segmentos[2] = Criar_Linha(++id, x + w, y + h, x, y + h, cor);
+    segmentos[3] = Criar_Linha(++id, x, y + h, x, y, cor);
+    segmentos[4] = NULL;
+    
+    return segmentos;
+}
