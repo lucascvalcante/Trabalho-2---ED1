@@ -55,10 +55,12 @@ bool removeArv(Arvore arv, void* chave, Visita destruir);
 /// @details Ideal para imprimir a árvore em relatórios ordenados
 void traverseArv(Arvore arv, Visita visita, void* aux);
 
+
 /// @brief Libera toda a memória ocupada pela árvore
 /// @param arv Ponteiro apontando para a árvore
 /// @param destruir Função que libera a memória ocupada por todos os elementos da árvore
 void killArv(Arvore arv, Visita destruir);
+
 
 /// @brief Retorna a altura da árvore
 /// @param arv Ponteiro apontando para a árvore

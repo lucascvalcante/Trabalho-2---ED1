@@ -1,6 +1,6 @@
 #include "arvore.h"
-#include "stdio.h"
-#include "stdlib.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 typedef struct node{
     void *dado;
@@ -35,9 +35,9 @@ static node *InserirRecursivo(node *no, void *dado, Comparador comp, bool *inser
     int cmp = comp(dado, no->dado);
 
     if(cmp < 0){
-        no->esq = InserirRecursivo(no->esq, dado, cmp, inseriu);
+        no->esq = InserirRecursivo(no->esq, dado, comp, inseriu);
     }else if(cmp > 0){
-        no->dir = InserirRecursivo(no->dir, dado, cmp, inseriu);
+        no->dir = InserirRecursivo(no->dir, dado, comp, inseriu);
     }else{
         *inseriu = false;
     }
@@ -53,9 +53,9 @@ static void *BuscarRecursivo(node *no, void *chave, Comparador comp){
     int cmp = comp(chave, no->dado);
 
     if(cmp < 0){
-        return BuscarRecursivo(no->esq, chave, cmp);
+        return BuscarRecursivo(no->esq, chave, comp);
     }else if(cmp > 0){
-        return BuscarRecursivo(no->dir, chave, cmp);
+        return BuscarRecursivo(no->dir, chave, comp);
     }else{
         return no->dado;
     }
@@ -79,9 +79,9 @@ static node *removerRecursivo(node *no, void *chave, Comparador comp, Visita des
     int cmp = comp(chave, no->dado);
 
     if(cmp < 0){
-        no->esq = removerRecursivo(no->esq, chave, cmp, destruir, removeu);
+        no->esq = removerRecursivo(no->esq, chave, comp, destruir, removeu);
     }else if(cmp > 0){
-        no->dir = removerRecursivo(no->dir, chave, cmp, destruir, removeu);
+        no->dir = removerRecursivo(no->dir, chave, comp, destruir, removeu);
     }else{
         *removeu = true;
 
@@ -100,7 +100,7 @@ static node *removerRecursivo(node *no, void *chave, Comparador comp, Visita des
         node *temp = encontrarMinimo(no->dir);
         if(destruir != NULL) destruir(no->dado, NULL);
         no->dado = temp->dado;
-        no->dir = removerRecursivo(no->dir, no->dado, cmp, NULL, removeu);
+        no->dir = removerRecursivo(no->dir, no->dado, comp, NULL, removeu);
     }
 
     return no;
@@ -163,7 +163,7 @@ bool InsertArv(Arvore arvore, void *dado){
 void *searchArv(Arvore arvore, void *chave){
     stArvore *arv = ((stArvore*)arvore);
     if(arv == NULL || chave == NULL){
-        return;
+        return NULL;
     }    
 
     return BuscarRecursivo(arv->raiz, chave, arv->comp);
@@ -176,7 +176,7 @@ bool removeArv(Arvore arvore, void *chave, Visita destruir){
     }    
     
     bool removeu = false;
-    arv->raiz = removerRecursivo(arv->raiz, chave, arv->comp, destruir, removeu);
+    arv->raiz = removerRecursivo(arv->raiz, chave, arv->comp, destruir, &removeu);
     return removeu;
 }
 
@@ -198,4 +198,14 @@ int Get_altura(Arvore arvore){
 
     return AlturaRecursiva(arv->raiz);
     
+}
+
+void traverseArv(Arvore arvore, Visita visita, void *aux){
+    stArvore *
+    arv = ((stArvore*)arvore);
+    if(arv == NULL || visita == NULL){
+        return;
+    }    
+    
+    traverseRecursivo(arv->raiz, visita, aux);
 }
