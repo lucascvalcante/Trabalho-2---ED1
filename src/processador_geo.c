@@ -2,11 +2,11 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
-#include "chao.h"
 #include "linha.h"
 #include "texto.h"
 #include "retangulo.h"
 #include "circulo.h"
+#include "formas.h"
 
 Chao ProcessaGeo(const char *caminhoGeo){
     FILE *arqGeo = fopen(caminhoGeo, "r");

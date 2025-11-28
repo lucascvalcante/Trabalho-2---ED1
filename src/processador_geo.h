@@ -1,8 +1,8 @@
 #ifndef PROCESSADOR_GEO_H
 #define PROCESSADOR_GEO_H
 
-#include "chao.h"
 #include "texto.h"
+
 
 
 /// @brief Lê um arquivo .geo, cria e insere as formas no chão
