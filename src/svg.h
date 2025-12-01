@@ -1,12 +1,11 @@
 #ifndef SVG_H
 #define SVG_H
 
+#include "lista.h"
 #include "texto.h"
 #include "circulo.h"
 #include "linha.h"
 #include "retangulo.h"
-#include "fila.h"
-#include "arena.h"
 #include "formas.h"
 
 /*
@@ -53,7 +52,7 @@ void FinalizarSvg(Svg svg);
 /// @brif Recebe uma fila de formas que serão geradas no svg
 /// @param path_svg Nome do arquivo .svg
 /// @param filaSvg Fila com as formas que serão adicionadas 
-void GerarSvg(const char* path_svg, Fila filaSvg);
+void GerarSvg(const char* path_svg, Lista listaSvg);
 
 
 /// @brief Função para desenhar em um svg uma única forma genérica

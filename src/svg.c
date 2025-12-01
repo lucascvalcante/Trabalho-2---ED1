@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "svg.h"
-#include "fila.h"
 #include "formas.h"     
 #include "circulo.h"    
 #include "retangulo.h"  
@@ -13,6 +12,7 @@
 typedef struct Svg{
     FILE* arquivo;
 }Stsvg;
+
 
 
 Svg CriarSvg(const char* nomearquivo){
@@ -146,24 +146,6 @@ void FinalizarSvg(Svg svg){
     free(s);
 }
 
-void GerarSvg(const char* path_svg, Fila filaSvg){
-    if(path_svg == NULL || filaSvg == NULL){
-        printf("Erro: Argumentos nulos fornecidos para a função de gerar svg!\n");
-        return;
-    } 
-
-
-    Svg svg_handle = CriarSvg(path_svg);
-    if(svg_handle == NULL){
-        printf("Erro ao criar svg!\n");
-        return;
-    }
-
-    PassthroughQueue(filaSvg, DesenharFormaSvg, svg_handle);
-    FinalizarSvg(svg_handle);
-
-}
-
 
 void DesenharFormaSvg(void* item, void* aux){
     Forma f = (Forma)item;
@@ -194,6 +176,24 @@ void DesenharFormaSvg(void* item, void* aux){
         return;
         break;
     }
+}
+
+void GerarSvg(const char* path_svg, Lista listaSvg){
+    if(path_svg == NULL || listaSvg == NULL){
+        printf("Erro: Argumentos nulos fornecidos para a função de gerar svg!\n");
+        return;
+    } 
+
+
+    Svg svg_handle = CriarSvg(path_svg);
+    if(svg_handle == NULL){
+        printf("Erro ao criar svg!\n");
+        return;
+    }
+
+    Percorrer_lista(listaSvg, DesenharFormaSvg, svg_handle);
+
+    FinalizarSvg(svg_handle);
 }
 
 
