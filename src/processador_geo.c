@@ -8,129 +8,116 @@
 #include "circulo.h"
 #include "formas.h"
 
-Chao ProcessaGeo(const char *caminhoGeo){
-    FILE *arqGeo = fopen(caminhoGeo, "r");
-    if(arqGeo == NULL){
-        printf("Não foi possível realizar a leitura do arquivo!\n");
-        return NULL;
+
+/// @brief estrutura interna usada para controlar o estado do estilo
+typedef struct estilo{
+    char familia[64];
+    char peso[16];
+    char tamanho[16];
+}StEstilo;
+
+/// --- Funções privadas auxiliares: --- ///
+
+static void extrair_texto(const char *linha, int offset, char *destino, size_t max){
+    if(offset <= 0){
+        destino[0] = '\0';
+        return;
+    }
+    const char *inicio = linha + offset;
+    while(*inicio && (*inicio == ' ' || *inicio == '\t')){
+        inicio++;
     }
 
+    strncpy(destino, inicio, max - 1);
+    destino[max - 1] = '\0';
+    destino[strcspn(destino, "\r\n")] = '\0';
+}
+
+static void processar_circulo(const char* linha, Lista lista) {
+    int id; 
+    double x, y, r;
+    char corb[64], corp[64];
+
+    if (sscanf(linha, "c %d %lf %lf %lf %s %s", &id, &x, &y, &r, corb, corp) == 6) {
+        Circulo c = Criar_Circulo(id, x, y, r, corb, corp);
+        Forma f = Criar_Forma(CIRCULO, c);
+        Inserir_fim(lista, f);
+    }
+}
+
+static void processar_retangulo(const char* linha, Lista lista) {
+    int id; double x, y, w, h;
+    char corb[64], corp[64];
+
+    if (sscanf(linha, "r %d %lf %lf %lf %lf %s %s", &id, &x, &y, &w, &h, corb, corp) == 7) {
+        Retangulo r = Criar_Retangulo(id, x, y, w, h, corb, corp);
+        Forma f = Criar_Forma(RETANGULO, r);
+        Inserir_fim(lista, f);
+    }
+}
+
+static void processar_linha(const char* linha, Lista lista) {
+    int id; double x1, y1, x2, y2;
+    char cor[64];
+
+    if (sscanf(linha, "l %d %lf %lf %lf %lf %s", &id, &x1, &y1, &x2, &y2, cor) == 6) {
+        Linha l = Criar_Linha(id, x1, y1, x2, y2, cor);
+        Forma f = Criar_Forma(LINHA, l);
+        Inserir_fim(lista, f);
+    }
+}
+
+static void processar_texto(const char* linha, Lista lista, StEstilo *est_atual) {
+    int id; double x, y;
+    char corb[64], corp[64], ancora;
+    int offset = 0;
+
+    if (sscanf(linha, "t %d %lf %lf %s %s %c %n", &id, &x, &y, corb, corp, &ancora, &offset) >= 6) {
+        char conteudo[256];
+        extrair_texto(linha, offset, conteudo, sizeof(conteudo));
+        Estilo e = NULL;
+        Texto t = Criar_Texto(id, x, y, corb, corp, ancora, conteudo, e);
+        Forma f = Criar_Forma(TEXTO, t);
+        Inserir_fim(lista, f);
+    }
+}
+
+static void processar_estilo(const char* linha, StEstilo *est) {
+    sscanf(linha, "ts %s %s %s", est->familia, est->peso, est->tamanho);
+
+}
+
+/// --- Função principal pública : --- ///
+
+Lista ProcessaGeo(const char *caminhoGeo){
+    FILE *geo = fopen(caminhoGeo, "r");
+    if(geo == NULL){
+        printf("Erro ao abrir o arquivo .geo!\n");
+        exit(1);
+    }
+
+    StEstilo estilo_atual = {"sans", "normal", "12px"};
     char buffer[1024];
-    Chao chao = Cria_chao();
-    if(chao == NULL){
-        printf("Erro ao criar o chão!\n");
-        fclose(arqGeo);
+    char comando[16];
+    Lista lista = Criar_Lista();
+    if(lista == NULL){
+        fclose(geo);
         return NULL;
     }
-    Estilo estiloAtual = Criar_Estilo("sans-serif", "bold", "30px");
 
-    while (fgets(buffer, sizeof(buffer), arqGeo) != NULL){
-        if (buffer[0] == '\n' || buffer[0] == '#') {
-            continue;
-        }
+    while(fgets(buffer, sizeof(buffer), geo)){
+        if(buffer[0] == '\n' || buffer[0] == '#') continue;
 
-        char comando[16];
-        sscanf(buffer, "%s", comando);
-
-         if (strcmp(comando, "ts") == 0) {
-            char fFamily[100], fWeight[100], fSize[100];
-            int itens_lidos = sscanf(buffer, "%*s %99s %99s %99s", fFamily, fWeight, fSize);
-            if(itens_lidos != 3){
-                fprintf(stderr, "ERRO: linha de comando 'ts' ignorada: %s\n", buffer);
-                continue;
-            }
-            
-            if(estiloAtual != NULL){
-                KillEstilo(estiloAtual);
-            }
-            estiloAtual = Criar_Estilo(fFamily, fWeight, fSize);
-            if(estiloAtual == NULL){
-                exit(1);
-            }
-        }
-        else {
-
-            if (strcmp(comando, "c") == 0) {
-                int id; double x, y, r; char corb[100], corp[100];
-                int itens_lidos = sscanf(buffer, "%*s %d %lf %lf %lf %99s %99s", &id, &x, &y, &r, corb, corp);
-                if(itens_lidos != 6){
-                    fprintf(stderr, "ERRO: linha de comando 'c' ignorada: %s\n", buffer);
-                    continue;
-                }
-                
-                Circulo c = Criar_Circulo(id, x, y, r, corp, corb);
-                if(c){
-                    Forma f = Criar_Forma(CIRCULO, c);
-                    if(f){
-                        InserirChao(chao, f);
-                    }else{
-                        KillCirculo(c);
-                    }
-                }
-            }
-            else if (strcmp(comando, "r") == 0) {
-            int id; double x, y, w, h; char corb[100], corp[100];
-            int itens_lidos = sscanf(buffer, "%*s %d %lf %lf %lf %lf %99s %99s", &id, &x, &y, &w, &h, corb, corp);
-            if(itens_lidos != 7){
-                fprintf(stderr, "ERRO: Linha de comando 'r' ignorada: %s\n", buffer);
-                continue;
-            }
-
-                Retangulo rt = Criar_Retangulo(id, x, y, w, h, corp, corb);
-                if(rt){
-                    Forma f = Criar_Forma(RETANGULO, rt);
-                    if(f){
-                        InserirChao(chao, f);
-                    }else{
-                        KillRetangulo(rt);
-                    }
-                }
-            }
-            else if (strcmp(comando, "l") == 0) {
-                int id; double x1, y1, x2, y2; char cor[100];
-                int itens_lidos = sscanf(buffer, "%*s %d %lf %lf %lf %lf %99s", &id, &x1, &y1, &x2, &y2, cor);
-                if(itens_lidos != 6){
-                fprintf(stderr, "ERRO: Linha de comando 'l' ignorada: %s\n", buffer);
-                continue;
-                }
-
-                Linha l = Criar_Linha(id, x1, y1, x2, y2, cor);
-                if(l){
-                   Forma f = Criar_Forma(LINHA, l);
-                    if(f){
-                        InserirChao(chao, f);
-                    }else{
-                        KillLinha(l);
-                    }
-                }
-            }
-            else if (strcmp(comando, "t") == 0) {
-                int id, chars_lidos = 0;
-                double x, y; char corb[100], corp[100], a;
-                
-                int itens_lidos = sscanf(buffer, "%*s %d %lf %lf %99s %99s %c %n", &id, &x, &y, corb, corp, &a, &chars_lidos);
-                if(itens_lidos != 6){
-                fprintf(stderr, "ERRO: Linha de comando 't' ignorada: %s\n", buffer);
-                continue;   
-                }
-
-                char *conteudo_texto = buffer + chars_lidos;
-                conteudo_texto[strcspn(conteudo_texto, "\r\n")] = 0;
-                Estilo novo_estilo = CriarCopiaEstilo(estiloAtual);
-                Texto t = Criar_Texto(id, x, y, corb, corp, a, conteudo_texto, novo_estilo);
-                if(t){
-                    Forma f = Criar_Forma(TEXTO, t);
-                    if(f){
-                        InserirChao(chao, f);
-                    }else{
-                        KillTexto(t);
-                    }
-                }                
-            }
+        if(sscanf(buffer, "%s", comando) == 1){
+            if(strcmp(comando, "c") == 0) processar_circulo(buffer, lista);
+            else if(strcmp(comando, "r") == 0) processar_retangulo(buffer, lista);
+            else if(strcmp(comando, "l") == 0) processar_linha(buffer, lista);
+            else if(strcmp(comando, "t") == 0) processar_texto(buffer, lista, &estilo_atual);
+            else if(strcmp(comando, "ts") == 0) processar_estilo(buffer, &estilo_atual);
         }
     }
 
-    KillEstilo(estiloAtual);
-    fclose(arqGeo);
-    return chao;
+    fclose(geo);
+    return lista;
+
 }
