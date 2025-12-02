@@ -8,6 +8,7 @@
 #include "linha.h"      
 #include "string.h"     
 #include <math.h>
+#include "visibilidade.h"
 
 typedef struct Svg{
     FILE* arquivo;
@@ -197,3 +198,51 @@ void GerarSvg(const char* path_svg, Lista listaSvg){
 }
 
 
+void InserirBombaSvg(Svg svg, double x, double y){
+    Stsvg *s = (Stsvg*)svg;
+    if (s == NULL || s->arquivo == NULL) return;
+
+    fprintf(s->arquivo, "\t<circle cx=\"%.2lf\" cy=\"%.2lf\" r=\"5\" "
+                        "fill=\"red\" stroke=\"black\" stroke-width=\"1\" />\n", x, y);
+}
+
+
+void InserirPoligonoSvg(Svg svg, Poligono poly){
+    Stsvg *s = (Stsvg*)svg;
+    if (s == NULL || s->arquivo == NULL || poly == NULL) return;
+
+    Lista pontos = getVertices(poly);
+    if (pontos == NULL || Tamanho_lista(pontos) < 3) return;
+
+    fprintf(s->arquivo, "\t<polygon points=\"");
+    
+    void* node = GetFirst(pontos);
+    while (node != NULL) {
+        Ponto p = (Ponto)GetData(node);
+        double px = get_ponto_x(p);
+        double py = get_ponto_y(p);
+        
+        fprintf(s->arquivo, "%.2lf,%.2lf ", px, py);
+        
+        node = GetNext(node);
+    }
+
+    fprintf(s->arquivo, "\" fill=\"yellow\" opacity=\"0.5\" stroke=\"none\" />\n");
+}
+
+void InserirBoundingBoxSvg(Svg svg, Poligono poly){
+    Stsvg *s = (Stsvg*)svg;
+    if (s == NULL || s->arquivo == NULL || poly == NULL) {
+        return;
+    }
+
+    double x, y, w, h;
+    getBoundingBox(poly, &x, &y, &w, &h);
+
+    if (w <= 0.001 || h <= 0.001) return;
+
+    fprintf(s->arquivo, "\t<rect x=\"%.2lf\" y=\"%.2lf\" width=\"%.2lf\" height=\"%.2lf\" "
+                        "fill=\"none\" stroke=\"blue\" stroke-width=\"1\" "
+                        "stroke-dasharray=\"5,5\" />\n", 
+                        x, y, w, h);
+}

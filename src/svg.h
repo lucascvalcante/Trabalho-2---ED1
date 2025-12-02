@@ -7,6 +7,7 @@
 #include "linha.h"
 #include "retangulo.h"
 #include "formas.h"
+#include "poligono.h"
 
 /*
     Arquivo .h relacionado a manipulação do arquivo em formato svg. Com funções para escrever e inserir formas no arquivo
@@ -59,6 +60,25 @@ void GerarSvg(const char* path_svg, Lista listaSvg);
 /// @param item Forma que será desenhada
 /// @param aux Ponteiro para dados auxiliares
 void DesenharFormaSvg(void* item, void* aux);
+
+
+/// @brief Insere um marcador de bomba no svg
+/// @param svg Ponteiro apontando para o arquivo svg
+/// @param x Coordenada X da bomba
+/// @param y Coordenada Y da bomba
+void InserirBombaSvg(Svg svg, double x, double y);
+
+
+/// @brief Insere um polígono no svg
+/// @param svg Ponteiro apontando para o arquivo svg
+/// @param poly Ponteiro apontando para o polígono que será inserido
+void InserirPoligonoSvg(Svg svg, Poligono poly);
+
+
+/// @brief Insere a Bounding Box no svg
+/// @param svg Ponteiro apontando para o svg
+/// @param poly Ponteiro apontando para o polígono
+void InserirBoundingBoxSvg(Svg svg, Poligono poly);
 
 
 #endif
