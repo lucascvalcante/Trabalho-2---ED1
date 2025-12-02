@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 typedef void* Lista;
+
 /*
     Arquivo .h relacionado a uma lista duplamente encadeada e suas funções básicas.
 */
@@ -101,6 +102,24 @@ int Tamanho_lista(Lista l);
 /// @param contexto Dados auxiliares
 /// @return A nova lista
 Lista Filtrar_lista(Lista l, bool (*condicao)(void*, void*), void* contexto);
+
+
+/// @brief Retorna o primeiro nó da lista 
+/// @param l Ponteiro apontando para a lista
+/// @return O primeiro nó
+void *GetFirst(Lista l);
+
+
+/// @brief Retorna o próximo nó a partir de um nó atual
+/// @param node O nó atual
+/// @return O próximo nó
+void *GetNext(void *node);
+
+
+/// @brief retorna o dado guardado dentro do nó
+/// @param node O nó que será retornado
+/// @return O dado dentro do nó(forma)
+void *GetData(void *node);
 
 
 #endif

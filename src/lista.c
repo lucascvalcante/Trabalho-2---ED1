@@ -299,6 +299,31 @@ Lista Filtrar_lista(Lista lista, bool (*condicao)(void*, void*), void* contexto)
 }
 
 
+void *GetFirst(Lista lista){
+    Stlista *l = ((Stlista*)lista);
+    if(l == NULL){
+        return NULL;
+    }    
 
+    return l->inicio;
+}
+
+void *GetNext(void *Node){
+    node *no = ((node*)Node);
+    if(no == NULL){
+        return NULL;
+    }
+    
+    return no->prox;
+}
+
+void *GetData(void *Node){
+    node *no = ((node*)Node);
+    if(no == NULL){
+        return NULL;
+    }  
+
+    return no->forma;
+}
 
 
