@@ -9,6 +9,7 @@
 #include "retangulo.h"
 #include "texto.h"
 #include "linha.h"
+#include "visibilidade.h"
 
 
 /*
@@ -157,6 +158,152 @@ static void GetSegmentoForma(Forma f, double* x1, double* y1, double* x2, double
     }
 }
 
+static bool box_poligono_colide(double x, double y, double w, double h, Poligono p) {
+    if (isInside(p, x, y)) return true;
+    if (isInside(p, x + w, y)) return true;
+    if (isInside(p, x + w, y + h)) return true;
+    if (isInside(p, x, y + h)) return true;
+
+    Lista vertices = getVertices(p);
+    void* node = GetFirst(vertices);
+    while(node) {
+        Ponto pt = GetData(node);
+        double px = get_ponto_x(pt);
+        double py = get_ponto_y(pt);
+        
+        if (px >= x && px <= x + w && py >= y && py <= y + h) return true;
+        
+        node = GetNext(node);
+    }
+
+    if (segmento_cruza_poligono(x, y, x + w, y, p)) return true;         
+    if (segmento_cruza_poligono(x + w, y, x + w, y + h, p)) return true; 
+    if (segmento_cruza_poligono(x + w, y + h, x, y + h, p)) return true; 
+    if (segmento_cruza_poligono(x, y + h, x, y, p)) return true;         
+
+    return false;
+}
+
+
+static bool segmento_cruza_poligono(double x1, double y1, double x2, double y2, Poligono poly) {
+    Lista vertices = getVertices(poly);
+    if (!vertices) return false;
+
+    void* node = GetFirst(vertices);
+    Ponto p_prev = (Ponto)GetData(node);
+    node = GetNext(node);
+
+    while (node != NULL) {
+        Ponto p_curr = (Ponto)GetData(node);
+   
+        if (linha_linha_colide(x1, y1, x2, y2, 
+                               get_ponto_x(p_prev), get_ponto_y(p_prev), 
+                               get_ponto_x(p_curr), get_ponto_y(p_curr))) {
+            return true;
+        }
+        
+        p_prev = p_curr;
+        node = GetNext(node);
+    }
+    
+    Ponto p_first = (Ponto)GetData(GetFirst(vertices));
+    if (linha_linha_colide(x1, y1, x2, y2, 
+                           get_ponto_x(p_prev), get_ponto_y(p_prev), 
+                           get_ponto_x(p_first), get_ponto_y(p_first))) {
+        return true;
+    }
+
+    return false;
+}
+
+
+static bool texto_poligono_colide(Texto t, Poligono p) {
+
+    double x = GetXTexto(t);
+    double y = GetYTexto(t);
+    char* conteudo = GetTxtoTexto(t);
+    char ancora = GetATexto(t);
+
+    int len = (conteudo != NULL) ? strlen(conteudo) : 0;
+    double w = len * 10.0;
+    double h = 10.0;
+
+    double x_box;
+    if (ancora == 'i') {
+        x_box = x;
+    } else if (ancora == 'm') {
+        x_box = x - (w / 2.0);
+    } else { // 'f'
+        x_box = x - w;
+    }
+
+    double y_box = y - h; 
+
+    return box_poligono_colide(x_box, y_box, w, h, p);
+}
+
+
+static bool circulo_poligono_colide(Circulo c, Poligono p) {
+    double cx = GetXCirculo(c);
+    double cy = GetYCirculo(c);
+    double r = GetRCirculo(c);
+
+    if (isInside(p, cx, cy)) return true;
+
+    Lista vertices = getVertices(p);
+    void* node = GetFirst(vertices);
+    Ponto p_prev = (Ponto)GetData(node);
+    node = GetNext(node);
+
+    while (node != NULL) {
+        Ponto p_curr = (Ponto)GetData(node);
+        if (linha_circulo_colide(get_ponto_x(p_prev), get_ponto_y(p_prev), 
+                                 get_ponto_x(p_curr), get_ponto_y(p_curr), c)) {
+            return true;
+        }
+        p_prev = p_curr;
+        node = GetNext(node);
+    }
+    Ponto p_first = (Ponto)GetData(GetFirst(vertices));
+    if (linha_circulo_colide(get_ponto_x(p_prev), get_ponto_y(p_prev), 
+                             get_ponto_x(p_first), get_ponto_y(p_first), c)) {
+        return true;
+    }
+
+    return false;
+}
+
+
+static bool retangulo_poligono_colide(Retangulo r, Poligono p) {
+    return box_poligono_colide(GetXRetangulo(r), GetYRetangulo(r), 
+                               GetWRetangulo(r), GetHRetangulo(r), p);
+}
+
+
+static bool texto_poligono_colide(Texto t, Poligono p) {
+
+    double x = GetXTexto(t);
+    double y = GetYTexto(t);
+    char* conteudo = GetTxtoTexto(t);
+    char ancora = GetATexto(t);
+
+    int len = (conteudo != NULL) ? strlen(conteudo) : 0;
+    double w = len * 10.0;
+    double h = 10.0;
+
+    double x_box;
+    if (ancora == 'i') {
+        x_box = x;
+    } else if (ancora == 'm') {
+        x_box = x - (w / 2.0);
+    } else { 
+        x_box = x - w;
+    }
+
+    double y_box = y - h; 
+
+    return box_poligono_colide(x_box, y_box, w, h, p);
+}
 
 /*
     ---- FUNÇÃO PRINCIPAL DE SOBREPOSIÇÃO: -----
@@ -204,6 +351,37 @@ bool FormaSobrepoe(Forma forma1, Forma forma2){
         }
     }
     return false;
+}
+
+
+bool FormaSobrepoePoligono(Forma f, Poligono p) {
+    if (!f || !p) return false;
+
+    Tipo_Forma tipo = GetTipoForma(f);
+    void* dados = GetDadosForma(f);
+
+    switch (tipo) {
+        case CIRCULO:
+            return circulo_poligono_colide((Circulo)dados, p);
+        
+        case RETANGULO:
+            return retangulo_poligono_colide((Retangulo)dados, p);
+        
+        case LINHA:
+            {
+                Linha l = (Linha)dados;
+                double x1 = GetX1Linha(l), y1 = GetY1Linha(l);
+                double x2 = GetX2Linha(l), y2 = GetY2Linha(l);
+                if (isInside(p, x1, y1) || isInside(p, x2, y2)) return true;
+                return segmento_cruza_poligono(x1, y1, x2, y2, p);
+            }
+            
+        case TEXTO:
+            return texto_poligono_colide((Texto)dados, p);
+            
+        default:
+            return false;
+    }
 }
 
 
