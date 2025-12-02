@@ -14,7 +14,7 @@ typedef struct Circulo{
 }StCirculo;
 
 
-Circulo Criar_Circulo(int id, double x, double y, double r, char *corp, char *corb){
+Circulo Criar_Circulo(int id, double x, double y, double r, char *corb, char *corp){
     
     StCirculo *c = malloc(sizeof(StCirculo));
     if(c == NULL){

@@ -10,7 +10,7 @@ typedef struct Retangulo{
     char *corp, *corb;
 }StRetangulo;
 
-Retangulo Criar_Retangulo(int id, double x, double y, double w, double h, char *corp, char *corb){
+Retangulo Criar_Retangulo(int id, double x, double y, double w, double h, char *corb, char *corp){
     StRetangulo *r = malloc(sizeof(StRetangulo));
     if(r == NULL){
         printf("Não foi possível alocar memória para a criação do retângulo!\n");
@@ -134,7 +134,7 @@ void KillRetangulo(Retangulo r){
     free(re);
 }
 
-Linha** TranformarRetanguloSegmento(Retangulo r){
+Linha** TransformaRetanguloSegmento(Retangulo r){
     StRetangulo *re = ((StRetangulo*)r);
     if(re == NULL){
         return NULL;
