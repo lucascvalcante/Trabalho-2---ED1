@@ -277,29 +277,25 @@ Estilo CriarCopiaEstilo(Estilo st){
 
 
 Linha** TransformaTextoSegmento(Texto texto){
-    StTexto *t = ((StTexto*)texto);
-    if(t == NULL){
-        return NULL;
-    }
+StTexto *t = ((StTexto*)texto);
+    if(t == NULL) return NULL;
 
-    Linha** segmentos = malloc(sizeof(Linha*) * 2);
-    if(segmentos == NULL){
-        return NULL;
-    }
+    Linha** segmentos = malloc(sizeof(Linha*) * 5);
+    if(segmentos == NULL) return NULL;
 
     double x = GetXTexto(t);
-    double y = GetYTexto(t);
+    double y = GetYTexto(t); 
     char *txto = GetTxtoTexto(t);
     char ancora = GetATexto(t);
     char *cor = GetCorbTexto(t);
 
     int tamanho = (txto != NULL) ? strlen(txto) : 0;
     double comprimento = 10.0 * tamanho;
+    double altura = 10.0; 
 
     double x1, x2;
 
-    switch (ancora)
-    {
+    switch (ancora) {
     case 'i':
         x1 = x;
         x2 = x + comprimento;
@@ -312,17 +308,22 @@ Linha** TransformaTextoSegmento(Texto texto){
         x1 = x - comprimento;
         x2 = x;
         break;
-        
     default:
         x1 = x;
         x2 = x + comprimento;
         break;
     }
 
+    double y_base = y;
+    double y_topo = y - altura; 
+
     static int id = 3000;
-    int novo_id = ++id;
-    segmentos[0] = Criar_Linha(novo_id, x1, y, x2, y, cor);
-    segmentos[1] = NULL;
+
+    segmentos[0] = Criar_Linha(++id, x1, y_base, x2, y_base, cor);
+    segmentos[1] = Criar_Linha(++id, x1, y_topo, x2, y_topo, cor);
+    segmentos[2] = Criar_Linha(++id, x1, y_base, x1, y_topo, cor);
+    segmentos[3] = Criar_Linha(++id, x2, y_base, x2, y_topo, cor);
+    segmentos[4] = NULL;
 
     return segmentos;
 }
