@@ -10,7 +10,7 @@ typedef struct node{
 
 typedef struct arvore{
     node *raiz;
-    Comparador comp;
+    ComparadorArv comp;
 }stArvore;
 
 /// --- Funções auxiliares privadas: --- ///
@@ -26,7 +26,7 @@ static node *NewNode(void *dado){
     return novo;
 }
 
-static node *InserirRecursivo(node *no, void *dado, Comparador comp, bool *inseriu){
+static node *InserirRecursivo(node *no, void *dado, ComparadorArv comp, bool *inseriu){
     if(no == NULL){
         *inseriu = true;
         return NewNode(dado);
@@ -45,7 +45,7 @@ static node *InserirRecursivo(node *no, void *dado, Comparador comp, bool *inser
     return no;
 }
 
-static void *BuscarRecursivo(node *no, void *chave, Comparador comp){
+static void *BuscarRecursivo(node *no, void *chave, ComparadorArv comp){
     if(no == NULL){
         return NULL;
     }
@@ -70,7 +70,7 @@ static node *encontrarMinimo(node *no){
 }
 
 
-static node *removerRecursivo(node *no, void *chave, Comparador comp, Visita destruir, bool *removeu){
+static node *removerRecursivo(node *no, void *chave, ComparadorArv comp, Visita destruir, bool *removeu){
     if(no == NULL){
         *removeu = false;
         return NULL;
@@ -138,7 +138,7 @@ static int AlturaRecursiva(node *no){
 
 /// --- Funções principais públicas : --- ///
 
-Arvore Criar_arv(Comparador comp){
+Arvore Criar_arv(ComparadorArv comp){
     stArvore *arv = malloc(sizeof(stArvore));
     if(arv == NULL){
         return NULL;

@@ -11,7 +11,7 @@ typedef void *Arvore;
 /// retorna < 0 se (a < b)
 /// 0 se (a == b)
 /// > 0 se (a > b)
-typedef int (*Comparador)(void *a, void *b); 
+typedef int (*ComparadorArv)(void *a, void *b); 
 
 
 /// @brief Função de visita, usada para desenhar no svg, imprimir ou reportar dados
@@ -23,14 +23,14 @@ typedef void (*Visita)(void *dado, void *aux);
 /// @brief Cria uma nova árvore vazia
 /// @param comp Função que define a regra de ordenação da árvore
 /// @return Ponteiro para a árvore criada
-Arvore Criar_arv(Comparador comp);
+Arvore Criar_arv(ComparadorArv comp);
 
 
 /// @brief Insere um elemento na árvore
 /// @param arv Ponteiro apontando para a árvore
 /// @param dado o dado genérico que será inserido
 /// @return 'True' se a inserção for bem sucedidda
-bool insertArv(Arvore arv, void* dado);
+bool InsertArv(Arvore arv, void* dado);
 
 
 /// @brief Realiza a operação de busca em um elemento da árvore
