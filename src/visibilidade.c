@@ -102,7 +102,7 @@ Poligono calc_regiao_visibilidade(Ponto origem, Lista anteparos, char tipo_ord, 
 
     Poligono poly = criaPoligono();
     int qtd_segmentos = Tamanho_lista(anteparos);
-    if (qtd_segmentos == 0) return poly;
+    if (qtd_segmentos == 0) return poly; 
 
     int max_eventos = qtd_segmentos * 2 * 3;
     EventoAngulo** eventos = malloc(sizeof(EventoAngulo*) * max_eventos);
@@ -111,17 +111,14 @@ Poligono calc_regiao_visibilidade(Ponto origem, Lista anteparos, char tipo_ord, 
     void* node = GetFirst(anteparos);
     while (node != NULL) {
         Forma f = (Forma)GetData(node);
-        if (GetTipoForma(f) == LINHA) {
-            Linha l = (Linha)GetDadosForma(f);
-            double x1 = GetX1Linha(l), y1 = GetY1Linha(l);
-            double x2 = GetX2Linha(l), y2 = GetY2Linha(l);
-            double coords[2][2] = {{x1, y1}, {x2, y2}};
+        if (GetTipoForma(f) == LINHA) { 
+            Linha l = (Linha)GetDadosForma(f); 
+            double coords[4] = {GetX1Linha(l), GetY1Linha(l), GetX2Linha(l), GetY2Linha(l)};
             for (int k = 0; k < 2; k++) {
-                double px = coords[k][0];
-                double py = coords[k][1];
+                double px = coords[2*k];
+                double py = coords[2*k+1];
                 double angulo_base = atan2(py - oy, px - ox);
-                
-                double offsets[] = {-EPSILON, 0, EPSILON};
+                double offsets[] = {0, -EPSILON, EPSILON}; 
                 for (int j = 0; j < 3; j++) {
                     EventoAngulo* evt = malloc(sizeof(EventoAngulo));
                     evt->angulo = angulo_base + offsets[j];
@@ -142,19 +139,23 @@ Poligono calc_regiao_visibilidade(Ponto origem, Lista anteparos, char tipo_ord, 
 
     g_ox = ox; g_oy = oy;
 
-    Arvore arvore_ativos = Criar_arv(comparar_segmentos_ativos);
-    
-    node = GetFirst(anteparos);
-    while (node != NULL) {
-        Forma f = (Forma)GetData(node);
-        InsertArv(arvore_ativos, f);
-        node = GetNext(node);
-    }
-
     for (int i = 0; i < num_eventos; i++) {
         double dx = eventos[i]->x_destino;
         double dy = eventos[i]->y_destino;
         g_dx = dx; g_dy = dy;
+
+        Arvore arvore_ativos = Criar_arv(comparar_segmentos_ativos);
+        
+        node = GetFirst(anteparos);
+        while (node != NULL) {
+            Forma f = (Forma)GetData(node);
+            Linha l = (Linha)GetDadosForma(f);
+            
+            if (calcular_distancia_interseccao(ox, oy, dx, dy, l, NULL, NULL) < DBL_MAX) {
+                InsertArv(arvore_ativos, f);
+            }
+            node = GetNext(node);
+        }
 
         double best_x = ox + dx * raio_max;
         double best_y = oy + dy * raio_max;
@@ -163,17 +164,12 @@ Poligono calc_regiao_visibilidade(Ponto origem, Lista anteparos, char tipo_ord, 
 
         if (f_prox != NULL) {
             Linha l_prox = (Linha)GetDadosForma(f_prox);
-            double ix, iy;
-            if (calcular_distancia_interseccao(ox, oy, dx, dy, l_prox, &ix, &iy) < DBL_MAX) {
-                best_x = ix;
-                best_y = iy;
-            }
+            calcular_distancia_interseccao(ox, oy, dx, dy, l_prox, &best_x, &best_y);
         }
 
         insertVertice(poly, best_x, best_y);
+        killArv(arvore_ativos, NULL);
     }
-
-    killArv(arvore_ativos, NULL);
 
     for (int i = 0; i < num_eventos; i++) free(eventos[i]);
     free(eventos);
