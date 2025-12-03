@@ -68,14 +68,14 @@ static void processar_linha(const char* linha, Lista lista) {
 }
 
 static void processar_texto(const char* linha, Lista lista, StEstilo *est_atual) {
-    int id; double x, y;
+int id; double x, y;
     char corb[64], corp[64], ancora;
     int offset = 0;
 
     if (sscanf(linha, "t %d %lf %lf %s %s %c %n", &id, &x, &y, corb, corp, &ancora, &offset) >= 6) {
         char conteudo[256];
         extrair_texto(linha, offset, conteudo, sizeof(conteudo));
-        Estilo e = NULL;
+        Estilo e = Criar_Estilo(est_atual->familia, est_atual->peso, est_atual->tamanho);
         Texto t = Criar_Texto(id, x, y, corb, corp, ancora, conteudo, e);
         Forma f = Criar_Forma(TEXTO, t);
         Inserir_fim(lista, f);
@@ -90,15 +90,20 @@ static void processar_estilo(const char* linha, StEstilo *est) {
 /// --- Função principal pública : --- ///
 
 Lista ProcessaGeo(const char *caminhoGeo){
-    FILE *geo = fopen(caminhoGeo, "r");
+FILE *geo = fopen(caminhoGeo, "r");
     if(geo == NULL){
         printf("Erro ao abrir o arquivo .geo!\n");
-        exit(1);
+        exit(1); 
     }
 
-    StEstilo estilo_atual = {"sans", "normal", "12px"};
+    StEstilo estilo_atual;
+    strcpy(estilo_atual.familia, "sans");
+    strcpy(estilo_atual.peso, "normal");
+    strcpy(estilo_atual.tamanho, "12px");
+
     char buffer[1024];
     char comando[16];
+    
     Lista lista = Criar_Lista();
     if(lista == NULL){
         fclose(geo);
@@ -106,7 +111,7 @@ Lista ProcessaGeo(const char *caminhoGeo){
     }
 
     while(fgets(buffer, sizeof(buffer), geo)){
-        if(buffer[0] == '\n' || buffer[0] == '#') continue;
+        if(buffer[0] == '\n' || buffer[0] == '#') continue; 
 
         if(sscanf(buffer, "%s", comando) == 1){
             if(strcmp(comando, "c") == 0) processar_circulo(buffer, lista);
@@ -119,5 +124,4 @@ Lista ProcessaGeo(const char *caminhoGeo){
 
     fclose(geo);
     return lista;
-
 }
