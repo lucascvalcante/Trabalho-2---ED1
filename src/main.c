@@ -9,11 +9,10 @@
 
 #define PATH_SIZE 1024
 
-// --- FUNÇÕES AUXILIARES  ---
+// --- FUNÇÕES AUXILIARES  --- ///
 
 void monta_caminho(char* path_completo, const char* base_dir, const char* nome_arquivo) {
     if (base_dir != NULL && strlen(base_dir) > 0) {
-        // Verifica se o base_dir já termina com '/'
         if (base_dir[strlen(base_dir) - 1] == '/') {
             sprintf(path_completo, "%s%s", base_dir, nome_arquivo);
         } else {
@@ -85,45 +84,53 @@ int main(int argc, char *argv[]) {
 
     char base_geo[256];
     extrair_nome_base(nome_geo, base_geo);
-
-    char nome_final[512];
     
+    char path_svg_inicial[PATH_SIZE];
+    sprintf(path_svg_inicial, "%s/%s.svg", path_saida, base_geo);
+
+    printf("Gerando SVG Inicial: %s\n", path_svg_inicial);
+    Svg svg_inicial = CriarSvg(path_svg_inicial);
+    Percorrer_lista(formas, DesenharFormaSvg, svg_inicial);
+    FinalizarSvg(svg_inicial);
+
     if (nome_qry != NULL) {
         char base_qry[256];
         extrair_nome_base(nome_qry, base_qry);
+        
+        char nome_final[512];
         sprintf(nome_final, "%s-%s", base_geo, base_qry);
-    } else {
-        strcpy(nome_final, base_geo);
-    }
 
-    char path_svg_final[PATH_SIZE];
-    char path_txt_final[PATH_SIZE];
-    
-    sprintf(path_svg_final, "%s/%s.svg", path_saida, nome_final);
-    sprintf(path_txt_final, "%s/%s.txt", path_saida, nome_final);
+        char path_svg_final[PATH_SIZE];
+        char path_txt_final[PATH_SIZE];
+        
+        sprintf(path_svg_final, "%s/%s.svg", path_saida, nome_final);
+        sprintf(path_txt_final, "%s/%s.txt", path_saida, nome_final);
 
-    printf("Criando SVG Final: %s\n", path_svg_final);
-    Svg svg_handle = CriarSvg(path_svg_final);
-
-    if (nome_qry != NULL) {
+        printf("\n--- Processando QRY ---\n");
+        printf("Criando SVG Final: %s\n", path_svg_final);
+        
+        Svg svg_handle = CriarSvg(path_svg_final);
+        
         char path_qry_completo[PATH_SIZE];
         monta_caminho(path_qry_completo, path_entrada, nome_qry);
 
-        printf("Processando QRY: %s\n", path_qry_completo);
+        printf("Lendo QRY: %s\n", path_qry_completo);
         printf(" -> Log: %s\n", path_txt_final);
         
+
         processa_qry(path_qry_completo, path_txt_final, 
                 formas, anteparos, 
                 path_saida, nome_final, svg_handle, 
                 threshold_i, tipo_ord);
         
-         Percorrer_lista(anteparos, DesenharFormaSvg, svg_handle);
+
+        Percorrer_lista(anteparos, DesenharFormaSvg, svg_handle);
+        Percorrer_lista(formas, DesenharFormaSvg, svg_handle);
+        
+        FinalizarSvg(svg_handle);
     }
 
-    Percorrer_lista(formas, DesenharFormaSvg, svg_handle);
-    FinalizarSvg(svg_handle);
-
-    printf("Limpando memória...\n");
+    printf("\nLimpando memória...\n");
     Destruir_lista(formas, destruir_forma_void);
     Destruir_lista(anteparos, destruir_forma_void);
 
