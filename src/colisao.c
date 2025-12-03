@@ -357,4 +357,3 @@ bool FormaSobrepoePoligono(Forma f, Poligono p) {
     }
 }
 
-
