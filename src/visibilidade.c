@@ -176,7 +176,6 @@ Poligono calc_regiao_visibilidade(Ponto origem, Lista anteparos, char tipo_ord, 
             Forma f = (Forma)GetData(node);
             Linha l = (Linha)GetDadosForma(f);
             
-            // Verifica se intercepta (se é ativo)
             if (calcular_distancia_interseccao(ox, oy, dx, dy, l, NULL, NULL) < DBL_MAX) {
                 InsertArv(arvore_ativos, f);
             }
