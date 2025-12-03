@@ -158,32 +158,6 @@ static void GetSegmentoForma(Forma f, double* x1, double* y1, double* x2, double
     }
 }
 
-static bool box_poligono_colide(double x, double y, double w, double h, Poligono p) {
-    if (isInside(p, x, y)) return true;
-    if (isInside(p, x + w, y)) return true;
-    if (isInside(p, x + w, y + h)) return true;
-    if (isInside(p, x, y + h)) return true;
-
-    Lista vertices = getVertices(p);
-    void* node = GetFirst(vertices);
-    while(node) {
-        Ponto pt = GetData(node);
-        double px = get_ponto_x(pt);
-        double py = get_ponto_y(pt);
-        
-        if (px >= x && px <= x + w && py >= y && py <= y + h) return true;
-        
-        node = GetNext(node);
-    }
-
-    if (segmento_cruza_poligono(x, y, x + w, y, p)) return true;         
-    if (segmento_cruza_poligono(x + w, y, x + w, y + h, p)) return true; 
-    if (segmento_cruza_poligono(x + w, y + h, x, y + h, p)) return true; 
-    if (segmento_cruza_poligono(x, y + h, x, y, p)) return true;         
-
-    return false;
-}
-
 
 static bool segmento_cruza_poligono(double x1, double y1, double x2, double y2, Poligono poly) {
     Lista vertices = getVertices(poly);
@@ -216,37 +190,36 @@ static bool segmento_cruza_poligono(double x1, double y1, double x2, double y2, 
     return false;
 }
 
+static bool box_poligono_colide(double x, double y, double w, double h, Poligono p) {
+    if (isInside(p, x, y)) return true;
+    if (isInside(p, x + w, y)) return true;
+    if (isInside(p, x + w, y + h)) return true;
+    if (isInside(p, x, y + h)) return true;
 
-static bool texto_poligono_colide(Texto t, Poligono p) {
-
-    double x = GetXTexto(t);
-    double y = GetYTexto(t);
-    char* conteudo = GetTxtoTexto(t);
-    char ancora = GetATexto(t);
-
-    int len = (conteudo != NULL) ? strlen(conteudo) : 0;
-    double w = len * 10.0;
-    double h = 10.0;
-
-    double x_box;
-    if (ancora == 'i') {
-        x_box = x;
-    } else if (ancora == 'm') {
-        x_box = x - (w / 2.0);
-    } else { // 'f'
-        x_box = x - w;
+    Lista vertices = getVertices(p);
+    void* node = GetFirst(vertices);
+    while(node) {
+        Ponto pt = GetData(node);
+        double px = get_ponto_x(pt);
+        double py = get_ponto_y(pt);
+        
+        if (px >= x && px <= x + w && py >= y && py <= y + h) return true;
+        
+        node = GetNext(node);
     }
 
-    double y_box = y - h; 
+    if (segmento_cruza_poligono(x, y, x + w, y, p)) return true;         
+    if (segmento_cruza_poligono(x + w, y, x + w, y + h, p)) return true; 
+    if (segmento_cruza_poligono(x + w, y + h, x, y + h, p)) return true; 
+    if (segmento_cruza_poligono(x, y + h, x, y, p)) return true;         
 
-    return box_poligono_colide(x_box, y_box, w, h, p);
+    return false;
 }
 
 
 static bool circulo_poligono_colide(Circulo c, Poligono p) {
     double cx = GetXCirculo(c);
     double cy = GetYCirculo(c);
-    double r = GetRCirculo(c);
 
     if (isInside(p, cx, cy)) return true;
 
