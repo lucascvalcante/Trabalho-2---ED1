@@ -202,8 +202,14 @@ void InserirBombaSvg(Svg svg, double x, double y){
     Stsvg *s = (Stsvg*)svg;
     if (s == NULL || s->arquivo == NULL) return;
 
-    fprintf(s->arquivo, "\t<circle cx=\"%.2lf\" cy=\"%.2lf\" r=\"5\" "
-                        "fill=\"red\" stroke=\"black\" stroke-width=\"1\" />\n", x, y);
+	fprintf(s->arquivo, "<circle cx=\"%lf\" cy=\"%lf\" r=\"1\" stroke-opacity=\"0.5\" fill=\"none\""
+			  " stroke=\" #FF0000\" stroke-width=\"2\" stroke-dasharray=\"1, 1\" />\n", x, y);
+
+	fprintf(s->arquivo, "<circle cx=\"%lf\" cy=\"%lf\" r=\"3\" stroke-opacity=\"0.5\" fill=\"none\""
+			  " stroke=\" #FF0000\" stroke-width=\"2\" stroke-dasharray=\"1, 1\" />\n", x, y);
+
+	fprintf(s->arquivo, "<circle cx=\"%lf\" cy=\"%lf\" r=\"2\" stroke-opacity=\"0.5\" fill=\"none\""
+			  " stroke=\"#FF00FF\" stroke-width=\"2\" stroke-dasharray=\"1, 1\" />\n", x, y);
 }
 
 
