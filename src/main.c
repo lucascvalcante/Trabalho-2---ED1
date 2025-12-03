@@ -104,7 +104,6 @@ int main(int argc, char *argv[]) {
 
     printf("Criando SVG Final: %s\n", path_svg_final);
     Svg svg_handle = CriarSvg(path_svg_final);
-    Percorrer_lista(formas, DesenharFormaSvg, svg_handle);
 
     if (nome_qry != NULL) {
         char path_qry_completo[PATH_SIZE];
@@ -121,6 +120,7 @@ int main(int argc, char *argv[]) {
          Percorrer_lista(anteparos, DesenharFormaSvg, svg_handle);
     }
 
+    Percorrer_lista(formas, DesenharFormaSvg, svg_handle);
     FinalizarSvg(svg_handle);
 
     printf("Limpando memória...\n");
