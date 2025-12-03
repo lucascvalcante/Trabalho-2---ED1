@@ -17,7 +17,7 @@ static void merge(void **vetor, int meio, int n, Comparador comp){
     }
 
     while (i < meio && j < n) {
-        if (comp(vetor[i], vetor[j]) <= 0) {
+        if (comp(&vetor[i], &vetor[j]) <= 0) {
             aux[k++] = vetor[i++];
         } else {
             aux[k++] = vetor[j++];
@@ -47,7 +47,7 @@ void insertionSort(void **vetor, int n, Comparador comp){
         int j = i - 1;
     
 
-        while(j >= 0 && comp(vetor[j], aux) > 0){
+        while(j >= 0 && comp(&vetor[j], aux) > 0){
             vetor[j+1] = vetor[j];
             j--;
         }
