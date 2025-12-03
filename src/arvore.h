@@ -67,4 +67,10 @@ void killArv(Arvore arv, Visita destruir);
 /// @return A altura
 int Get_altura(Arvore arv);
 
+
+/// @brief Retorna o dado do nó mais a esquerda da árvore
+/// @param arv Ponteiro apontando para a árvore
+/// @return O dado do nó mais a esquerda
+void *GetMinArvore(Arvore arv);
+
 #endif

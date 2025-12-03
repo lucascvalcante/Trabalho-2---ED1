@@ -209,3 +209,17 @@ void traverseArv(Arvore arvore, Visita visita, void *aux){
     
     traverseRecursivo(arv->raiz, visita, aux);
 }
+
+
+void *GetMinArvore(Arvore arvore) {
+    stArvore *arv = ((stArvore*)arvore);
+    if (arv == NULL || arv->raiz == NULL) return NULL;
+
+    node *atual = arv->raiz;
+    
+    while (atual->esq != NULL) {
+        atual = atual->esq;
+    }
+    
+    return atual->dado;
+}
