@@ -108,7 +108,6 @@ void free_ponto(Ponto p) { if (p) free(p); }
 Poligono calc_regiao_visibilidade(Ponto origem, Lista anteparos, char tipo_ord, double raio_max, int threshold_i) {
     if (!origem || !anteparos) return NULL;
 
-    int qtd_original = Tamanho_lista(anteparos);
     adicionar_box_mundo(anteparos);
     StPonto* pt_origem = (StPonto*)origem;
     double ox = pt_origem->x;
