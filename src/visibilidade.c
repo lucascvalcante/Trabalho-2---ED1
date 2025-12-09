@@ -80,6 +80,18 @@ static int comparar_eventos(const void* a, const void* b) {
     return 0;
 }
 
+static void adicionar_box_mundo(Lista anteparos) {
+    Forma l1 = Criar_Forma(LINHA, Criar_Linha(9001, 0, 0, 1000, 0, "black"));       
+    Forma l2 = Criar_Forma(LINHA, Criar_Linha(9002, 1000, 0, 1000, 1000, "black")); 
+    Forma l3 = Criar_Forma(LINHA, Criar_Linha(9003, 1000, 1000, 0, 1000, "black")); 
+    Forma l4 = Criar_Forma(LINHA, Criar_Linha(9004, 0, 1000, 0, 0, "black"));      
+
+    Inserir_inicio(anteparos, l1);
+    Inserir_inicio(anteparos, l2);
+    Inserir_inicio(anteparos, l3);
+    Inserir_inicio(anteparos, l4);
+}
+
 // --- Funções Públicas ---
 
 Ponto init_ponto(double x, double y) {
@@ -96,6 +108,8 @@ void free_ponto(Ponto p) { if (p) free(p); }
 Poligono calc_regiao_visibilidade(Ponto origem, Lista anteparos, char tipo_ord, double raio_max, int threshold_i) {
     if (!origem || !anteparos) return NULL;
 
+    int qtd_original = Tamanho_lista(anteparos);
+    adicionar_box_mundo(anteparos);
     StPonto* pt_origem = (StPonto*)origem;
     double ox = pt_origem->x;
     double oy = pt_origem->y;
@@ -173,6 +187,15 @@ Poligono calc_regiao_visibilidade(Ponto origem, Lista anteparos, char tipo_ord, 
 
     for (int i = 0; i < num_eventos; i++) free(eventos[i]);
     free(eventos);
+
+    for(int k=0; k<4; k++) {
+        void* node = GetFirst(anteparos);
+        if(node) {
+            Forma f = (Forma)GetData(node);
+            RemoverElemento(anteparos, f);
+            DestruirForma(f);
+        }
+    }
 
     return poly;
 }
