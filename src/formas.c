@@ -547,4 +547,34 @@ Linha** Transforma_anteparo(Forma forma, char orientacao){
     return segmentos;
 }
 
+void SetIDForma(Forma forma, int id){
+    Stforma *f = ((Stforma*)forma);
+    if(f == NULL){
+        return;
+    }    
+
+    Tipo_Forma tipo = GetTipoForma(f);
+    void *dados = GetDadosForma(f);
+
+
+    switch (tipo){
+    case CIRCULO:
+        SetIDCirculo(dados, id);
+        break;
+    case RETANGULO:
+        SetIDRetangulo(dados, id);
+        break;
+    case LINHA:
+        SetIDLinha(dados, id);
+        break;
+    case TEXTO: 
+        SetIDTexto(dados, id);
+        break;
+    default:
+        printf("Forma inválida!\n");
+        break;
+    }
+
+}
+
 

@@ -124,6 +124,12 @@ void SetCorbForma(Forma f, char *corb);
 void SetCorpForma(Forma f, char *corp);
 
 
+/// @brief Define um novo id para a forma
+/// @param f Ponteiro apontando para a forma
+/// @param id Novo id
+void SetIDForma(Forma f, int id);
+
+
 /// @brief Troca a cor de borda com a cor de preenchimento de uma mesma forma
 /// @param f Ponteiro apontando para a forma
 void TrocaCoresForma(Forma f);
