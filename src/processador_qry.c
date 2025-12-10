@@ -15,42 +15,109 @@
 /// --- FUNÇÕES PRIVADAS AUXILIARES : --- ///
 
 static void comando_a(char *buffer, Lista formas, Lista anteparos, FILE *txt) {
-    int i, j; char orientacao;
+    int i, j; 
+    char orientacao;
+    
     sscanf(buffer, "a %d %d %c", &i, &j, &orientacao);
-    fprintf(txt, "\n[*] a %d %d %c\n", i, j, orientacao);
 
-    Lista remover = Criar_Lista();
+    if (txt) fprintf(txt, "a %d %d %c\n", i, j, orientacao);
+
     void* node = GetFirst(formas);
-
     while (node != NULL) {
         Forma f = (Forma)GetData(node);
         int id = GetIDForma(f);
 
         if (id >= i && id <= j) {
+            if (txt) {
+                fprintf(txt, "Processando Forma Original -> ID: %d, Tipo: %d\n", id, GetTipoForma(f));
+            }
+
             Linha** segs = Transforma_anteparo(f, orientacao);
+            
             if (segs) {
                 int k = 0;
                 while (segs[k] != NULL) {
-                    Forma f_seg = Criar_Forma(LINHA, segs[k]);
+                    Linha l = segs[k]; 
+                    if (txt) {
+                        fprintf(txt, "  -> Segmento Gerado ID: %d | (%.2f, %.2f) -> (%.2f, %.2f)\n",
+                                GetIDLinha(l), 
+                                GetX1Linha(l), GetY1Linha(l), 
+                                GetX2Linha(l), GetY2Linha(l));
+                    }
+
+                    Forma f_seg = Criar_Forma(LINHA, l);
                     Inserir_fim(anteparos, f_seg);
-                    fprintf(txt, " -> Segmento criado de ID %d\n", id);
                     k++;
                 }
                 free(segs);
             }
-            Inserir_fim(remover, f);
+        }    
+        node = GetNext(node);
+    }
+}
+
+static bool linha_dentro_retangulo(Linha l, void* r_dados) {
+    double rx = GetXRetangulo(r_dados);
+    double ry = GetYRetangulo(r_dados);
+    double rw = GetWRetangulo(r_dados);
+    double rh = GetHRetangulo(r_dados);
+
+    double lx1 = GetX1Linha(l);
+    double ly1 = GetY1Linha(l);
+    double lx2 = GetX2Linha(l);
+    double ly2 = GetY2Linha(l);
+    double margem = 1.0; 
+    double min_x = rx - margem;
+    double max_x = rx + rw + margem;
+    double min_y = ry - margem;
+    double max_y = ry + rh + margem;
+
+    bool p1_dentro = (lx1 >= min_x && lx1 <= max_x && ly1 >= min_y && ly1 <= max_y);
+    bool p2_dentro = (lx2 >= min_x && lx2 <= max_x && ly2 >= min_y && ly2 <= max_y);
+
+    return p1_dentro && p2_dentro;
+}
+
+
+static void remover_sombras_associadas(Lista anteparos, Forma f_destruida) {
+    if (!anteparos || !f_destruida) return;
+
+    Tipo_Forma tipo = GetTipoForma(f_destruida);
+    void* dados = GetDadosForma(f_destruida);
+    Lista para_remover = Criar_Lista();
+    int contagem = 0;
+
+    void* node = GetFirst(anteparos);
+    while (node) {
+        Forma f_anteparo = (Forma)GetData(node);
+        if (GetTipoForma(f_anteparo) == LINHA) {
+            Linha l = (Linha)GetDadosForma(f_anteparo);
+            bool remover = false;
+
+            if (tipo == RETANGULO) {
+                if (linha_dentro_retangulo(l, dados)) {
+                    remover = true;
+                }
+            }
+            
+            if (remover) {
+                Inserir_fim(para_remover, f_anteparo);
+                contagem++;
+            }
         }
         node = GetNext(node);
     }
 
-    node = GetFirst(remover);
+    node = GetFirst(para_remover);
     while(node) {
         Forma f = (Forma)GetData(node);
-        RemoverElemento(formas, f);
-        DestruirForma(f);
+        RemoverElemento(anteparos, f); 
+        DestruirForma(f); 
+        
         node = GetNext(node);
     }
-    Destruir_lista(remover, NULL);
+
+    Destruir_lista(para_remover, NULL);
 }
 
 
@@ -81,6 +148,7 @@ static void comando_d(char *buffer, Lista formas, Lista anteparos, FILE *txt,
     node = GetFirst(destruidos);
     while(node != NULL) {
         Forma f = (Forma)GetData(node);
+        remover_sombras_associadas(anteparos, f);
         RemoverElemento(formas, f);
         DestruirForma(f); 
         node = GetNext(node);
