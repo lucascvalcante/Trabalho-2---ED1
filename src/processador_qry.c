@@ -19,8 +19,8 @@ static void comando_a(char *buffer, Lista formas, Lista anteparos, FILE *txt) {
     char orientacao;
     
     sscanf(buffer, "a %d %d %c", &i, &j, &orientacao);
-
     if (txt) fprintf(txt, "a %d %d %c\n", i, j, orientacao);
+    Lista transmutados = Criar_Lista();
 
     void* node = GetFirst(formas);
     while (node != NULL) {
@@ -28,9 +28,8 @@ static void comando_a(char *buffer, Lista formas, Lista anteparos, FILE *txt) {
         int id = GetIDForma(f);
 
         if (id >= i && id <= j) {
-            if (txt) {
-                fprintf(txt, "Processando Forma Original -> ID: %d, Tipo: %d\n", id, GetTipoForma(f));
-            }
+            
+            if (txt) fprintf(txt, "Processando Forma Original -> ID: %d, Tipo: %d\n", id, GetTipoForma(f));
 
             Linha** segs = Transforma_anteparo(f, orientacao);
             
@@ -46,78 +45,24 @@ static void comando_a(char *buffer, Lista formas, Lista anteparos, FILE *txt) {
                     }
 
                     Forma f_seg = Criar_Forma(LINHA, l);
-                    Inserir_fim(anteparos, f_seg);
+                    Inserir_fim(anteparos, f_seg); 
                     k++;
                 }
                 free(segs);
+                Inserir_fim(transmutados, f);
             }
         }    
         node = GetNext(node);
     }
-}
 
-static bool linha_dentro_retangulo(Linha l, void* r_dados) {
-    double rx = GetXRetangulo(r_dados);
-    double ry = GetYRetangulo(r_dados);
-    double rw = GetWRetangulo(r_dados);
-    double rh = GetHRetangulo(r_dados);
-
-    double lx1 = GetX1Linha(l);
-    double ly1 = GetY1Linha(l);
-    double lx2 = GetX2Linha(l);
-    double ly2 = GetY2Linha(l);
-    double margem = 1.0; 
-    double min_x = rx - margem;
-    double max_x = rx + rw + margem;
-    double min_y = ry - margem;
-    double max_y = ry + rh + margem;
-
-    bool p1_dentro = (lx1 >= min_x && lx1 <= max_x && ly1 >= min_y && ly1 <= max_y);
-    bool p2_dentro = (lx2 >= min_x && lx2 <= max_x && ly2 >= min_y && ly2 <= max_y);
-
-    return p1_dentro && p2_dentro;
-}
-
-
-static void remover_sombras_associadas(Lista anteparos, Forma f_destruida) {
-    if (!anteparos || !f_destruida) return;
-
-    Tipo_Forma tipo = GetTipoForma(f_destruida);
-    void* dados = GetDadosForma(f_destruida);
-    Lista para_remover = Criar_Lista();
-    int contagem = 0;
-
-    void* node = GetFirst(anteparos);
-    while (node) {
-        Forma f_anteparo = (Forma)GetData(node);
-        if (GetTipoForma(f_anteparo) == LINHA) {
-            Linha l = (Linha)GetDadosForma(f_anteparo);
-            bool remover = false;
-
-            if (tipo == RETANGULO) {
-                if (linha_dentro_retangulo(l, dados)) {
-                    remover = true;
-                }
-            }
-            
-            if (remover) {
-                Inserir_fim(para_remover, f_anteparo);
-                contagem++;
-            }
-        }
-        node = GetNext(node);
-    }
-
-    node = GetFirst(para_remover);
-    while(node) {
+    node = GetFirst(transmutados);
+    while(node != NULL) {
         Forma f = (Forma)GetData(node);
-        RemoverElemento(anteparos, f); 
-        DestruirForma(f); 
-        
+        RemoverElemento(formas, f); 
+        DestruirForma(f);           
         node = GetNext(node);
     }
-
-    Destruir_lista(para_remover, NULL);
+    Destruir_lista(transmutados, NULL);
 }
 
 
@@ -127,48 +72,69 @@ static void comando_d(char *buffer, Lista formas, Lista anteparos, FILE *txt,
     
     double x, y; char sfx[64];
     sscanf(buffer, "d %lf %lf %s", &x, &y, sfx);
-    fprintf(txt, "\n[*] d %.2lf %.2lf %s\n", x, y, sfx);
+    if (txt) fprintf(txt, "\n[*] d %.2lf %.2lf %s\n", x, y, sfx);
 
     Ponto origem = init_ponto(x, y);
     Poligono poly = calc_regiao_visibilidade(origem, anteparos, tipo_ord, 10000.0, threshold);
 
-    Lista destruidos = Criar_Lista();
+    Lista mortos = Criar_Lista();
     void* node = GetFirst(formas);
     while (node != NULL) {
         Forma f = (Forma)GetData(node);
-
         if (FormaSobrepoePoligono(f, poly)) {
-            fprintf(txt, "Forma Destruida: ID %d\n", GetIDForma(f));
-            Inserir_fim(destruidos, f);
+            if (txt) fprintf(txt, "Forma Destruida -> ID: %d\n", 
+                             GetIDForma(f));
+            Inserir_fim(mortos, f);
         }
-        
         node = GetNext(node);
     }
 
-    node = GetFirst(destruidos);
-    while(node != NULL) {
+    Lista anteparos_mortos = Criar_Lista();
+    node = GetFirst(anteparos);
+    while (node != NULL) {
         Forma f = (Forma)GetData(node);
-        remover_sombras_associadas(anteparos, f);
-        RemoverElemento(formas, f);
-        DestruirForma(f); 
+        Linha l = (Linha)GetDadosForma(f);
+
+        if (GetIDLinha(l) < 9000) {
+            if (FormaSobrepoePoligono(f, poly)) {
+                if (txt) fprintf(txt, "Anteparo Destruido -> ID: %d, Tipo: LINHA\n", GetIDForma(f));
+                Inserir_fim(anteparos_mortos, f);
+            }
+        }
         node = GetNext(node);
     }
-    Destruir_lista(destruidos, NULL);
+
+    node = GetFirst(mortos);
+    while(node) {
+        Forma f = (Forma)GetData(node);
+        RemoverElemento(formas, f);
+        DestruirForma(f);
+        node = GetNext(node);
+    }
+
+    node = GetFirst(anteparos_mortos);
+    while(node) {
+        Forma f = (Forma)GetData(node);
+        RemoverElemento(anteparos, f); 
+        DestruirForma(f);              
+        node = GetNext(node);
+    }
+
+    Destruir_lista(mortos, NULL);
+    Destruir_lista(anteparos_mortos, NULL);
 
     if (strcmp(sfx, "-") != 0) {
         char path_full[512];
         sprintf(path_full, "%s/%s-%s.svg", path_saida, nome_base, sfx);
-        
         Svg svg_bomba = CriarSvg(path_full);
         if (svg_bomba) {
             InserirPoligonoSvg(svg_bomba, poly);    
-            InserirBoundingBoxSvg(svg_bomba, poly); 
             InserirBombaSvg(svg_bomba, x, y);      
+            InserirBoundingBoxSvg(svg_bomba, poly); 
             FinalizarSvg(svg_bomba);
         }
     } else if (svg_final != NULL) {
         InserirPoligonoSvg(svg_final, poly);
-        InserirBoundingBoxSvg(svg_final, poly);
         InserirBombaSvg(svg_final, x, y);
     }
 
