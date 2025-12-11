@@ -14,6 +14,18 @@
 
 /// --- FUNÇÕES PRIVADAS AUXILIARES : --- ///
 
+
+static Lista cemiterio_formas = NULL;
+
+
+static Lista GetCemiterio() {
+    if (cemiterio_formas == NULL) {
+        cemiterio_formas = Criar_Lista();
+    }
+    return cemiterio_formas;
+}
+
+
 static void comando_a(char *buffer, Lista formas, Lista anteparos, FILE *txt) {
     int i, j; 
     char orientacao;
@@ -59,7 +71,7 @@ static void comando_a(char *buffer, Lista formas, Lista anteparos, FILE *txt) {
     while(node != NULL) {
         Forma f = (Forma)GetData(node);
         RemoverElemento(formas, f); 
-        DestruirForma(f);           
+        Inserir_fim(GetCemiterio(), f);          
         node = GetNext(node);
     }
     Destruir_lista(transmutados, NULL);
@@ -203,6 +215,7 @@ static void comando_cln(char *buffer, Lista formas, Lista anteparos, FILE *txt, 
                  Svg svg_final, int threshold, char tipo_ord) {
 
     double x, y, dx, dy; char sfx[64];
+    static int id_clone_generator = 50000;
     sscanf(buffer, "cln %lf %lf %lf %lf %s", &x, &y, &dx, &dy, sfx);
     fprintf(txt, "\n[*] cln %.2lf %.2lf\n", x, y);
 
@@ -226,6 +239,30 @@ static void comando_cln(char *buffer, Lista formas, Lista anteparos, FILE *txt, 
             Inserir_fim(clones, novo);
         }
         node = GetNext(node);
+
+        if (cemiterio_formas != NULL) {
+            void* node = GetFirst(cemiterio_formas);
+            while (node != NULL) {
+                Forma f = (Forma)GetData(node);
+                
+
+                if (FormaSobrepoePoligono(f, poly)) {
+                    Forma novo = ClonarForma(f);
+                    SetIDForma(novo, ++id_clone_generator);
+                    double nx = GetXForma(novo) + dx;
+                    double ny = GetYForma(novo) + dy;
+                    SetPosicaoForma(novo, nx, ny);
+                    
+                    if (txt) {
+                        fprintf(txt, "RESGATADO E CLONADO (Antigo Anteparo) ID %d -> Novo ID %d em (%.2f, %.2f)\n", 
+                                GetIDForma(f), GetIDForma(novo), nx, ny);
+                    }
+                    
+                    Inserir_fim(clones, novo);
+                }
+                node = GetNext(node);
+            }
+        }
     }
 
     node = GetFirst(clones);
@@ -291,4 +328,15 @@ void processa_qry(const char* path_qry, const char* path_txt,
 
     fclose(qry);
     fclose(txt);
+
+    if (cemiterio_formas != NULL) {
+        void* node = GetFirst(cemiterio_formas);
+        while(node) {
+            Forma f = (Forma)GetData(node);
+            DestruirForma(f);
+            node = GetNext(node);
+        }
+        Destruir_lista(cemiterio_formas, NULL);
+        cemiterio_formas = NULL; 
+    }
 }
